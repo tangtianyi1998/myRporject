@@ -1,0 +1,69 @@
+---
+title: "iy21123_EMATM0061_B"
+author: "Tang tianyi"
+date: "12/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r import library}
+library(tidyverse)
+```
+
+## Section B
+
+### B.1
+#### question(a)
+define A and B: \
+ A = at least one person present within one metre of the gate, during that minute \
+ B = the sensor makes a sound
+ 
+$$
+p_0=P(A^c|B)\\
+p_1=P(A|B)\\
+q=P(A)
+$$
+To solve this question, I need to compute $\phi=P(B)$, here are the folmula for computation.\
+$$
+P(B)=P(A^c\cap B)+P(A\cap B)\\
+=P(A^c|B)P(A^c)+P(A|B)P(A) \\
+=P(A^c|B)[1-P(A)]+P(A|B)P(A)
+$$
+Now use the given parameter to define a function.
+```{r define function}
+c_prob_person_given_alarm<- function(p_0,p_1,q){
+  phi = p_0*(1-q)+p_1*q 
+  return(phi)
+}
+```
+
+#### question(b)
+```{r compute phi when given a q}
+p_not_A_given_B<-0.05
+p_A_given_B<-0.95
+p_A<-0.1
+c_prob_person_given_alarm(p_not_A_given_B,p_A_given_B,p_A)
+```   
+So when $p_0 = 0.05$, $p_1 = 0.95$ and $q = 0.1$, $\phi=0.14$
+
+#### question(c)
+```{r}
+p_not_A_given_B<-0.05
+p_A_given_B<-0.95
+plot_p_A<-seq(0,1,0.01)
+plot_p_B<-c_prob_person_given_alarm(p_not_A_given_B,p_A_given_B,plot_p_A)
+plot_p<-data.frame(plot_p_A,plot_p_B)
+probability_plot<-ggplot(data=plot_p,aes(x=plot_p_A,y=plot_p_B))+xlab("q")+ylab(expression(phi))+geom_line()+theme_bw()
+probability_plot+theme(axis.title.y = element_text(angle = 0))
+```
+
+### B.2
+```{r}
+```
+
+```{r}
+
+```
