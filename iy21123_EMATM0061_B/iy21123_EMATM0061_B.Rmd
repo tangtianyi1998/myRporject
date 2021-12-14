@@ -11,59 +11,337 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r import library}
 library(tidyverse)
+library(latex2exp)
 ```
 
 ## Section B
 
 ### B.1
-#### question(a)
+#### Question(a)
 define A and B: \
  A = at least one person present within one metre of the gate, during that minute \
- B = the sensor makes a sound
+ B = the sensor makes a sound\
  
 $$
-p_0=P(A^c|B)\\
-p_1=P(A|B)\\
-q=P(A)
+\begin{align}
+p_0&=P(B|A^c)\\
+p_1&=P(B|A)\\
+q&=P(A)
+\end{align}
 $$
 To solve this question, I need to compute $\phi=P(B)$, here are the folmula for computation.\
 $$
-P(B)=P(A^c\cap B)+P(A\cap B)\\
-=P(A^c|B)P(A^c)+P(A|B)P(A) \\
-=P(A^c|B)[1-P(A)]+P(A|B)P(A)
+\begin{align}
+P(B)&=P(A^c\cap B)+P(A\cap B)\\
+&=P(B|A^c)P(A^c)+P(B|A)P(A) \\
+&=P(B|A^c)[1-P(A)]+P(B|A)P(A) \\
+&=p_0\cdot(1-q)+p_1\cdot q
+\end{align}
 $$
-Now use the given parameter to define a function.
+Now use the given parameter to define a function.\
+
+$$
+\begin{align}
+\phi&=P(A|B) \\
+&=\frac{P(A\cap B)}{P(B)} \\
+&=\frac{P(B|A)P(A)}{P(B)} \\
+&=\frac{p_1\cdot q}{p_0\cdot(1-q)+p_1\cdot q}
+\end{align}
+$$
+
 ```{r define function}
-c_prob_person_given_alarm<- function(p_0,p_1,q){
-  phi = p_0*(1-q)+p_1*q 
-  return(phi)
+c_prob_person_given_alarm<- function(p_0,p_1,q){ # compute the conditional probability
+  t = p_0*(1-q)+p_1*q  
+  Res = p_1*q/t
+  return(Res)
 }
 ```
 
-#### question(b)
+#### Question(b)
 ```{r compute phi when given a q}
 p_not_A_given_B<-0.05
 p_A_given_B<-0.95
 p_A<-0.1
-c_prob_person_given_alarm(p_not_A_given_B,p_A_given_B,p_A)
+c_prob_person_given_alarm(p_not_A_given_B,p_A_given_B,p_A) # use function to compute conditional probability
 ```   
-So when $p_0 = 0.05$, $p_1 = 0.95$ and $q = 0.1$, $\phi=0.14$
+So when $p_0 = 0.05$, $p_1 = 0.95$ and $q = 0.1$, $\phi=0.68$ \
 
-#### question(c)
-```{r}
+#### Question(c)
+```{r draw plot}
 p_not_A_given_B<-0.05
 p_A_given_B<-0.95
 plot_p_A<-seq(0,1,0.01)
-plot_p_B<-c_prob_person_given_alarm(p_not_A_given_B,p_A_given_B,plot_p_A)
-plot_p<-data.frame(plot_p_A,plot_p_B)
+plot_p_B<-c_prob_person_given_alarm(p_not_A_given_B,p_A_given_B,plot_p_A) #use a sequence q to generate a list of conditional probability
+plot_p<-data.frame(plot_p_A,plot_p_B) 
 probability_plot<-ggplot(data=plot_p,aes(x=plot_p_A,y=plot_p_B))+xlab("q")+ylab(expression(phi))+geom_line()+theme_bw()
-probability_plot+theme(axis.title.y = element_text(angle = 0))
+probability_plot+theme(axis.title.y = element_text(angle = 0))  # change the ylab text angle
 ```
 
 ### B.2
+#### Question(a)
+$$
+p_X(x)=\left\{
+\begin{aligned}
+&1-\alpha-\beta-\gamma & & {x=0}\\
+&\alpha & & {x=1} \\
+&\beta & & {x=2} \\
+&\gamma & & {x=5} \\
+&0 & & {x\notin {0,1,2,5}}
+\end{aligned}
+\right.
+$$
+The probability mass function $p_X(x)$ is shown on markdown.\
+
+#### Question(b)
+
+$$
+\begin{align}
+E(X):&=\sum_{x\in \mathbb{R}}p_X(x) \cdot  x\\
+    &=(1-\alpha-\beta-\gamma) \cdot 0 + \alpha \cdot 1 + \beta \cdot 2 + \gamma \cdot 5 \\
+    &=\alpha+2\beta+5\gamma
+\end{align}
+$$
+The expression for the expection of $X$ is shown.\
+
+#### Question(c)
+$$
+\begin{align}
+Var(X):&=E[(X-E(x))^2]\\
+&=E[X^2]-E[X]^2\\
+&=(\alpha+4\beta+25\gamma) - (\alpha+2\beta+5\gamma)^2\\
+&=\alpha+4\beta+25\gamma-\alpha^2-4\beta^2-25\gamma^2-4\alpha\beta-10\alpha\gamma-20\beta\gamma\\
+\end{align}
+$$
+The expression for population variance of $X$ is shown.\
+
+#### Question(d)
+$$
+\begin{align}
+E(\bar{X})&=E(\frac{1}{n} \sum_{i=1}^{n} X_{i})\\
+&=\frac{1}{n}E(X_1+X_2+...+X_n)\\
+&=\frac{1}{n}(E(X_1)+E(X_2)+...+E(X_n))
+\end{align}
+$$
+Because $X_1, . . . , X_n$ is a sample consisting of independent and identically distributed random variables with X. \
+$$
+\begin{align}
+So:E(X)&=E(X_1)=E(X_2)=...=E(X_n)\\
+then: E(\bar{X})&=\frac{1}{n}(n\cdot E(X)) = E(X)\\
+&=\alpha+2\beta+5\gamma
+\end{align}
+$$
+The expression for the expectation of the random variable $\bar{X}$ is shown.\
+
+#### Question(e)
+$$
+\begin{align}
+Var(\bar{X})&=Var(\frac{1}{n} \sum_{i=1}^{n} X_{i})\\
+&=\frac{1}{n}Var(\sum_{i=1}^{n} X_{i}) \\
+&=\frac{1}{n^2}(Var(X_1)+Var(X_2)+...+Var(X_n))
+\end{align}
+$$
+As same as the expection, because of $i.i.d.$, the variance is the same thing.\
+$$
+\begin{align}
+Var(X)&=Var(X_1)=Var(X_2)=...=Var(X_n)\\
+Var(\bar{X}) &= \frac{1}{n^2}(n\cdot Var(X))\\
+&=\frac{1}{n}Var(X) \\
+&=\frac{\alpha+4\beta+25\gamma-\alpha^2-4\beta^2-25\gamma^2-4\alpha\beta-10\alpha\gamma-20\beta\gamma}{n}
+\end{align}
+$$
+The expression for the population variance of the random variable $\bar{X}$ is shown.\
+
+#### Question(f)
 ```{r}
+sample_X_0125<-function(alpha,beta,gamma,n){
+  sample_X<-data.frame(U=runif(n))%>% #generate a uniform distribution with sample size n
+    mutate(X=case_when((0<=U)&(U<alpha)~1,(alpha<=U)&(U<beta+alpha)~2,(beta+alpha<=U)&(U<alpha+beta+gamma)~5,(alpha+beta+gamma<=U)&(U<=1)~0))%>%  # convert the uniform distribution to our target distribution
+  pull(X)  # choose the X column
+  return(sample_X)
+}
 ```
 
-```{r}
-
+#### Question(g)
+```{r compute sample mean and variance}
+set.seed(1)
+sample_1<-sample_X_0125(0.1,0.2,0.3,100000)
+E_X<-mean(sample_1,na.rm = TRUE) 
+sample_variance<-var(sample_1,na.rm = TRUE)
+paste("sample_mean =",E_X)
+paste("sample_variance = ",sample_variance)
 ```
+Compute the formula shown before, then compare the result with the function compute result.\
+$$
+\begin{align}
+E(X)&=\alpha+2\beta+5\gamma \\
+&=0.1+2\cdot0.2+5\cdot0.3 \\
+&=2 \\
+Var(X)&=\alpha+4\beta+25\gamma-\alpha^2-4\beta^2-25\gamma^2-4\alpha\beta-10\alpha\gamma-20\beta\gamma\\
+&=0.1+0.6+7.5-0.1^2-4\cdot0.2^2-25\cdot0.3^2-4\cdot0.1\cdot0.2-10\cdot0.1\cdot0.3-20\cdot0.2\cdot0.3\\
+&=4.4 \\
+\end{align}
+$$
+As we can see,the expectation of sample is close to $E(X)=2$. In the light of the law of large numbers, we can get a closer expectation of sample when n comes to infinity. And the sample variance is also close to population variance $Var(X)=4.4$.\
+
+#### Question(h)
+```{r}
+set.seed(1)
+num_trials_per_sample_size<-10000 
+sim_by_n_df<-crossing(trial=seq(num_trials_per_sample_size),sample_size=100)%>%
+mutate(simulation=pmap(.l=list(trial,sample_size),.f=~sample_X_0125(0.1,0.2,0.3,100)))%>% # use sample_X_0125() and pmap() to generate a sequence of distribution which satisfy the question condition
+mutate(sample_mean=map_dbl(.x=simulation,.f=mean))
+```
+#### Question(i)
+```{r}
+histogram_plot<-ggplot(sim_by_n_df,aes(x=sample_mean))+geom_histogram(binwidth = 0.02)+theme_bw()
+histogram_plot
+```
+
+#### Question(j)
+```{r}
+sample_mean_X_bar<-mean(sim_by_n_df$sample_mean,na.rm = TRUE)
+sample_variance_X_bar<-var(sim_by_n_df$sample_mean,na.rm=TRUE)
+paste("sample_mean_X_bar =",round(sample_mean_X_bar,4))
+paste("sample_variance_Var_bar = ",round(sample_variance_X_bar,4 ))
+```
+
+So the numerical value of expectation $E(\bar{X})$ is 1.9994 and the numerical value of variance $Var(\bar{X})$ is 0.0436.\
+
+#### Question(k)
+First we can caculate $E(\bar{X})$ and $Var(\bar{X})$.\
+$$
+\begin{align}
+E(\bar{X})&=\alpha+2\beta+5\gamma \\
+&=0.1+2\cdot0.2+5\cdot0.3 \\
+&=2 \\
+Var(\bar{X})&=\frac{\alpha+4\beta+25\gamma-\alpha^2-4\beta^2-25\gamma^2-4\alpha\beta-10\alpha\gamma-20\beta\gamma}{n} \\
+&=\frac{4.4}{100}=0.044
+\end{align}
+$$
+
+```{r}
+scaled_sim_by_n_df<-sim_by_n_df%>%
+  mutate(density=dnorm(sample_mean,mean=2,sd=sqrt(0.044)))%>%
+  filter(sample_mean<=(2+sqrt(0.044)*4),(2-sqrt(0.044)*4)<=sample_mean)
+final_plot<-ggplot(scaled_sim_by_n_df)+geom_histogram(aes(x=sample_mean),binwidth = 0.02)+theme_bw()+geom_line(aes(x=sample_mean,y=200*density),col="red",size=1)+xlab(TeX("$x$"))+ylab(TeX("$200\\cdot f_{\\mu,\\sigma}(x)$")) 
+final_plot
+  
+```
+
+#### Question(l)
+As we can see, when the trial number $n$ equals to 10000, the sample mean obey a Gaussian distribution $\bar{X} \sim\mathcal{N}(\mu,\sigma^2)$, which $\mu=2,\sigma^2=0.044$. And when $n$ comes larger, the variance of sample mean decrease.
+According to the law of large numbers, when $n\rightarrow \infty$, $\lim _{n \rightarrow \infty} \mathbb{P}\left(\left|\bar{X}-X\right| \geq \epsilon\right)=0$. The sample mean
+will converge to population mean $\mu$ and the variance of sample mean will converge to $0$. \
+
+### B.3
+#### Question(a)
+$$
+\begin{align}
+E(X)&=\int_{-\infty}^{\infty}xp_\lambda(x)dx=\int_{0}^{\infty}\lambda xe^{-\lambda x}dx\\
+&=[-xe^{-\lambda x}]_{0}^{\infty}+\int_{0}^{\infty}e^{-\lambda x}dx\\
+&=0-[\frac{1}{\lambda}e^{-\lambda x}]_{0}^{\infty}=\frac{1}{\lambda}\\
+E[X^2]&=\int_{-\infty}^{\infty}x^2p_\lambda(x)dx=\int_{0}^{\infty}\lambda x^2e^{-\lambda x}dx\\
+&=[-x^2e^{-\lambda x}]_{0}^{\infty}+2\int_{0}^{\infty}xe^{-\lambda x}dx\\
+&=0+\frac{2}{\lambda}\int_{0}^{\infty}\lambda xe^{-\lambda x}dx\\
+&=\frac{2}{\lambda}\cdot \frac{1}{\lambda}=\frac{2}{\lambda^2}\\
+Var(X)&=E[X^2]-E[X]^2=\frac{2}{\lambda^2}-\frac{1}{\lambda^2}= \frac{1}{\lambda^2}
+\end{align}
+$$
+So the population mean is $\frac{1}{\lambda}$, and the variance is $\frac{1}{\lambda^2}$.\
+
+#### Question(b)
+
+The formula for cumulative distribution function is given by, \
+$$
+\begin{align}
+F_{\lambda}(x)=\int_{-\infty}^{x}p_{\lambda}(z)dz&=\left\{\begin{aligned}
+&0 & & x\leqslant0 \\
+&\int_{0}^{x}\lambda e^{-\lambda x}dx && x>0 
+\end{aligned}
+\right. \\
+&=\left\{\begin{aligned}
+&0 & & x\leqslant0 \\
+&1-e^{-\lambda x} && x>0 
+\end{aligned}
+\right. \\
+\end{align}
+$$
+And the quantile function is given by, \
+
+$$
+\begin{align}
+F_{\lambda}^{-1}(p)&=inf\{x\in\mathbb{R},\ p\leqslant F_{\lambda}(X)\}\\
+&=\left\{\begin{aligned}
+&-\infty & & p=0 \\
+&1-e^{-\lambda x} && p\in(0,1] 
+\end{aligned}
+\right. \\
+\end{align}
+$$
+
+
+#### Question(c)
+
+$$
+\begin{align}
+&l(\lambda)=\prod_{i=1}^{n}f_{\lambda}(X_i)=\lambda^ne^{-\lambda\sum_{i=1}^{n}X_i}=\lambda^ne^{-\lambda\cdot n\cdot\bar{X}} \\
+&\frac{\partial}{\partial \lambda}l(\lambda)
+=\lambda^{n-1}e^{-\lambda \cdot n \cdot \bar{X}}-n\lambda\bar{X}e^{-\lambda \cdot n \cdot \bar{X}}
+=\lambda^{n-1}e^{-\lambda \cdot n \cdot \bar{X}}(1-\lambda\bar{X}) \\
+&\because \lambda>0 \\
+&\therefore \hat{\lambda}_{MLE}=\frac{1}{\bar{X}}
+\end{align}
+$$
+So the maximum likehood estimate $ \hat{\lambda}_{MLE}$ for $\lambda_0$ equals to $\frac{1}{\bar{X}}$. \
+
+#### Question(d)
+
+```{r}
+set.seed(1)
+num_trials_per_sample_size<-100
+lambda_0<-0.01
+min_sample_size<-5
+max_sample_size<-100
+sample_size_int<-5
+
+sim_exp_MSE<-crossing(trial=seq(num_trials_per_sample_size),sample_size=seq(min_sample_size,max_sample_size,sample_size_int))%>%
+  mutate(simulation=pmap(.l=list(trial,sample_size),.f=~rexp(sample_size,rate = lambda_0)))%>% 
+  mutate(sample_mean=map_dbl(sample_size,.f=mean))%>%
+  mutate(frac_sample_mean=1/sample_mean) %>%  #  Target parameter is the reciprocal of sample mean
+  group_by(sample_size)%>%
+  summarize(msq_error=mean((frac_sample_mean-lambda_0)^2),na.rm=TRUE) # compute MSE by definition
+
+sim_exp_MSE%>%
+ggplot(aes(x=sample_size,y=msq_error))+geom_smooth()+theme_bw()+
+xlab("Sample size")+ylab("Mean square error")
+```
+The plot has shown the relationship between sample size and the mean square erroe of $\hat{\lambda}_{MLE}$. \
+
+#### Question(e)
+
+```{r}
+filename<-"bird_data_EMATM0061.csv"
+bird_data<-read_csv(file=filename)   #load data 
+```
+The maximum likekihood estimate of the rate parameter $\hat{\lambda}_{MLE}$ is given by, \
+```{r}
+bird_data_construct<-bird_data%>%
+  mutate(arrival_times=c(30,diff(Time))) #use diff() function to compute difference between rows
+lambda_MLE<-1/mean(bird_data_construct$arrival_times,na.rm = TRUE)
+paste("The rate parameter =", lambda_MLE)
+```
+#### Question(f)
+The confidence interval for $\lambda_0$ with a confidence level 95% is given by, \
+```{r}
+alpha<-0.05
+sample_size<-dim(bird_data_construct)[1]
+sample_mean<-bird_data_construct$arrival_times
+t<-qt(1-alpha/2,df=sample_size-1) # compute the quantile function for t 
+confidence_interval_l<-mean(sample_mean)-t*sd(sample_mean)/sqrt(sample_size)
+confidence_interval_u<-mean(sample_mean)+t*sd(sample_mean)/sqrt(sample_size)
+confidence_interval<-c(1/confidence_interval_u,1/confidence_interval_l)
+confidence_interval
+```
+
+
+

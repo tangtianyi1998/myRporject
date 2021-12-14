@@ -13,15 +13,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### A.1
 ```{r library load}
-library(readxl)
 library(tidyverse) #contain tidyr and stringr
 ```
 
 ```{r load data}
-folderpath<-"D:\\SCEM\\iy21123_EMATM0061_summative_assessment\\iy21123_EMATM0061_A"
 filename<-"finance_data_EMATM0061.csv"
-file_path<-paste(folderpath,filename,sep = "\\")  # paste the filepath
-finance_data_original<-read.csv(file_path)   #load data 
+finance_data_original<-read_csv(filename)   #load data 
 finance_data_original %>% dim()  # show the row and column number
 ```
 #### So this data frame have 1051 rows and 30 columns.
